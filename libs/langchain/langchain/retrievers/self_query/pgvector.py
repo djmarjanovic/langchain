@@ -18,8 +18,10 @@ class PGVectorTranslator(Visitor):
     allowed_comparators = [
         Comparator.EQ,
         Comparator.NE,
-        Comparator.GT,
         Comparator.LT,
+        Comparator.LTE,
+        Comparator.GT,
+        Comparator.GTE,
         Comparator.IN,
         Comparator.NIN,
         Comparator.CONTAIN,
@@ -29,16 +31,17 @@ class PGVectorTranslator(Visitor):
 
     def _format_func(self, func: Union[Operator, Comparator]) -> str:
         self._validate_func(func)
-        return f"{func.value}"
+        return func.value
 
     def visit_operation(self, operation: Operation) -> Dict:
         args = [arg.accept(self) for arg in operation.arguments]
         return {self._format_func(operation.operator): args}
 
     def visit_comparison(self, comparison: Comparison) -> Dict:
+        print(comparison)
         return {
             comparison.attribute: {
-                self._format_func(comparison.comparator): comparison.value
+                self._format_func(comparison.comparator): comparison.value['date'] if isinstance(comparison.value, dict) and comparison.value['type'] == 'date' else comparison.value
             }
         }
 
