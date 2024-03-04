@@ -381,6 +381,33 @@ class OpenSearchVectorSearch(VectorStore):
             is_aoss=self.is_aoss,
         )
 
+    def delete(self, ids: Optional[List[str]] = None, refresh_indices: Optional[bool] = True, **kwargs: Any) -> Optional[bool]:
+        """Delete documents from the Elasticsearch index.
+
+        Args:
+            ids: List of ids of documents to delete.
+            refresh_indices: Whether to refresh the index
+                            after deleting documents. Defaults to True.
+        """
+        bulk = _import_bulk()
+
+        body = []
+
+        if ids is None:
+            raise ValueError("ids must be provided.")
+
+        for _id in ids:
+            body.append({"_op_type": "delete", "_index": self.index_name, "_id": _id})
+
+        if len(body) > 0:
+            try:
+                bulk(self.client, body, refresh=refresh_indices, ignore_status=404)
+                return True
+            except Exception as e:
+                raise e
+        else:
+            return False
+
     def add_texts(
         self,
         texts: Iterable[str],
