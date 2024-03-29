@@ -728,7 +728,7 @@ class OpenSearchVectorSearch(VectorStore):
         else:
             raise ValueError("Invalid `search_type` provided as an argument")
 
-        response = self.client.search(index=index_name, body=search_query)
+        response = self.client.search(index=index_name, body=search_query, params={"timeout": 120})
 
         return [hit for hit in response["hits"]["hits"]]
 
